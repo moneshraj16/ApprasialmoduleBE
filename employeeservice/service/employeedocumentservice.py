@@ -1,7 +1,7 @@
 from datetime import datetime
 from sys import prefix
 
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
 from utilityservice.data.response.empmessage import WisefinMsg, SuccessMessage, ErrorMessage, Success, SuccessStatus, Error, ErrorDescription
 from utilityservice.data.response.emplist import WisefinList
@@ -152,10 +152,11 @@ class EmployeeDocumentService:
         file_name = doc_obj.file_name
         contentType = file_name.split('.')[-1]
         response = HttpResponse(file)
-        response['Content-Disposition'] = 'attachments; filename="{}"'.format(file_name)
-        return response
+        # response['Content-Disposition'] = 'attachments; filename="{}"'.format(file_name)
+        doc_view = self.file_view_extention(contentType, response)
+        return doc_view
 
-
+#EMPLOYEE_GET
     def get_document(self, employee_id):
         file1_obj = Employeedocuments.objects.filter(employee_id=employee_id, file_type=1)
         file2_obj = Employeedocuments.objects.filter(employee_id=employee_id, file_type=2)
@@ -163,22 +164,52 @@ class EmployeeDocumentService:
         file2 = []
         arr = []
         for obj in file1_obj:
-            data_resp = EmployeeDocumentResponse()
-            data_resp.set_file_name(obj.file_name)
-            data_resp.set_id(obj.id)
+            data_resp = {}
+            data_resp['file_name'] = obj.file_name
+            data_resp['id'] = obj.id
+            file1.append(data_resp)
+            # data_resp = EmployeeDocumentResponse()
+            # data_resp.set_file_name(obj.file_name)
+            # data_resp.set_id(obj.id)
+            # file1.append(data_resp)
+
+        for obj in file2_obj:
+            data_resp = {}
+            data_resp['file_name'] = obj.file_name
+            data_resp['id'] = obj.id
+            file2.append(data_resp)
+            # data_resp = EmployeeDocumentResponse()
+            # data_resp.set_file_name(obj.file_name)
+            # data_resp.set_id(obj.id)
+            # file2.append(data_resp)
+        data = {
+            "file1": file1,
+            "file2": file2
+        }
+        # arr.append(data)
+        return data
+
+    def get_documents(self, employee_id):
+        file1_obj = Employeedocuments.objects.filter(employee_id=employee_id, file_type=1)
+        file2_obj = Employeedocuments.objects.filter(employee_id=employee_id, file_type=2)
+        file1 = []
+        file2 = []
+        for obj in file1_obj:
+            data_resp = {}
+            data_resp['file_name'] = obj.file_name
+            data_resp['id'] = obj.id
             file1.append(data_resp)
 
         for obj in file2_obj:
-            data_resp = EmployeeDocumentResponse()
-            data_resp.set_file_name(obj.file_name)
-            data_resp.set_id(obj.id)
+            data_resp = {}
+            data_resp['file_name'] = obj.file_name
+            data_resp['id'] = obj.id
             file2.append(data_resp)
         data = {
             "file1": file1,
             "file2": file2
         }
-        arr.append(data)
-        return arr
+        return data
         #     value = {}
         #     value['file_name'] = obj.file_name
         #     value['id'] = obj.id
@@ -192,10 +223,33 @@ class EmployeeDocumentService:
         doc_id = file_id
         obj_id = doc_id.split('_')[-1]
         doc_obj = Employeedocuments.objects.get(id=obj_id)
-        print(type(doc_obj))
         file = doc_obj.file_path
         file_name = doc_obj.file_name
         # contentType = file_name.split('.')[-1]
         response = HttpResponse(file)
         response['Content-Disposition'] = 'attachments; filename="{}"'.format(file_name)
         return response
+
+#FILE_VIEW_EXTENSION
+    def file_view_extention(self,extension,body):
+        # logger.info("extension  " + str(extension)+" "+str(type(extension)))
+        print("extension  " + str(extension)+ " "+str(type(extension)))
+
+        if extension == 'PDF' or extension == 'pdf':
+            # logger.info("PDF WORKING")
+            print("PDF WORKING")
+            return StreamingHttpResponse(body, content_type='application/pdf')
+        elif extension == 'JPEG' or extension == 'jpeg' or extension == 'JPG'  or extension == 'jpg':
+            # logger.info("JPEG WORKING")
+            print("JPEG WORKING")
+            return StreamingHttpResponse(body, content_type='image/jpeg')
+        elif extension == 'PNG' or extension == 'png' :
+            # logger.info("PNG WORKING")
+            print("PNG WORKING")
+            return StreamingHttpResponse(body, content_type='image/png')
+        elif extension == 'TIFF' or extension == 'tiff' or extension == 'TIF'  or extension == 'tif':
+            return StreamingHttpResponse(body, content_type='image/tiff')
+        else:
+            # logger.info("Else WORKING" + "application/octet-stream")
+            print("else WORKING","application/octet-stream")
+            return StreamingHttpResponse(body, content_type='application/octet-stream')

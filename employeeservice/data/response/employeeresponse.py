@@ -1,10 +1,12 @@
 import json
 
-from employeeservice.util.emputil import employee_type_val, gender_type_val
+from employeeservice.util.emputil import employee_type_val, gender_type_val, grade_type_val
+from masterservice.service.departementservice import DepartmentService
+from masterservice.service.designationservice import DesignationService
 
 
 class EmployeeResponse:
-    id, user_id, code, first_name, middle_name, last_name, email_id, role, doj, gender, dob, department, manager, employee_type = (None,)*14
+    id, user_id, code, first_name, middle_name, last_name, email_id, designation, doj, gender, dob, department, manager, employee_type, grade = (None,)*15
 
     def get(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
@@ -30,8 +32,10 @@ class EmployeeResponse:
     def set_email_id(self, email_id):
         self.email_id = email_id
 
-    def set_role(self, role):
-        self.role = role
+    def set_designation(self, designation):
+        res_serv = DesignationService()
+        val = res_serv.get_designation_info(designation)
+        self.designation = val
 
     def set_doj(self, doj):
         self.doj = str(doj)
@@ -43,8 +47,10 @@ class EmployeeResponse:
     def set_dob(self, dob):
         self.dob = str(dob)
 
-    def set_departement(self, department):
-        self.department = department
+    def set_department(self, department):
+        data_serv = DepartmentService()
+        dep_sis = data_serv.get_departments(department)
+        self.department = dep_sis
 
     def set_manager(self, manager):
         self.manager = manager
@@ -52,3 +58,7 @@ class EmployeeResponse:
     def set_employee_type(self, employee_type):
         val = employee_type_val(employee_type)
         self.employee_type = val
+
+    def set_grade(self, grade):
+        vals = grade_type_val(grade)
+        self.grade = vals

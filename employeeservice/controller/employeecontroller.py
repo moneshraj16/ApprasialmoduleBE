@@ -24,7 +24,8 @@ from employeeservice.service.employeepersonalinfoservice import EmployeePersonal
 from utilityservice.data.response.empmessage import WisefinMsg, SuccessMessage, ErrorMessage, Success, SuccessStatus, Error, ErrorDescription
 from employeeservice.data.request.employeedocumentrequest import EmployeeDocumentRequest
 from employeeservice.service.employeedocumentservice import EmployeeDocumentService
-from employeeservice.util.emputil import employee_type_compostie, employee_type_val
+from employeeservice.util.emputil import employee_type_compostie, employee_type_val, grade_type_val, \
+    grade_type_compostie, document_upload
 
 
 @csrf_exempt
@@ -171,6 +172,7 @@ def get_employee_edu(request, id):
         req_obj = EmployeeEducationService().get_employee_edu(id)
         response = HttpResponse(req_obj.get(), content_type='application/json')
         return response
+
     elif request.method == 'DELETE':
         req_obj = EmployeeEducationService().del_employee_edu(id)
         response = HttpResponse(req_obj.get(), content_type='application/json')
@@ -328,8 +330,18 @@ def emp_view_file(request, file_id):
     if request.method == 'GET':
         attachment_serv = EmployeeDocumentService()
         file_doc = attachment_serv.file_view(file_id)
-        resp_obj = HttpResponse(file_doc, content_type='application/json')
-        return resp_obj
+        return file_doc
+
+#EMPLOYEE_FILE_GET
+@csrf_exempt
+@api_view(['GET'])
+def emp_file_get(request, employee_id):
+    if request.method == 'GET':
+        doc_serv = EmployeeDocumentService()
+        req_obj = doc_serv.get_documents(employee_id)
+        res_val = json.dumps(req_obj)
+        response = HttpResponse(res_val, content_type='application/json')
+        return response
 
 
 #EMPLOYEE_TYPE_DROPDOWN
@@ -358,6 +370,25 @@ def employee_file_download(request, file_id):
     if request.method == 'GET':
         req_obj = EmployeeDocumentService().employee_file_download(file_id)
         response = HttpResponse(req_obj, content_type='application/json')
+        return response
+
+#EMPLOYEE_GRADE_DROPDOWN
+@csrf_exempt
+@api_view(['GET'])
+def get_grade(request, id):
+    if request.method == 'GET':
+        id = int(id)
+        req_obj = grade_type_val(id)
+        response = HttpResponse(req_obj.get(),content_type='application/json')
+        return response
+
+#FETCHING_EMPLOYEE_GRADE_DROPDOWN
+@csrf_exempt
+@api_view(['GET'])
+def fetch_grade(request):
+    if request.method == 'GET':
+        val = grade_type_compostie()
+        response = HttpResponse(val.get(), content_type='application/json')
         return response
 
 @csrf_exempt

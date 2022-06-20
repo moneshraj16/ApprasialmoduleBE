@@ -1,6 +1,7 @@
 import json
 
 from employeeservice.util.emputil import get_martial_status
+from masterservice.service.countryservice import CountryService
 
 
 class EmployeePersonalinfoResponse:
@@ -26,4 +27,6 @@ class EmployeePersonalinfoResponse:
         self.emc_contact_person_number = emc_contact_person_number
 
     def set_nationality(self, nationality):
-        self.nationality = nationality
+        resp_serv = CountryService()
+        val = resp_serv.get_country_info(nationality)
+        self.nationality = val

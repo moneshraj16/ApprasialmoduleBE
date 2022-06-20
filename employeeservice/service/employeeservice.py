@@ -10,7 +10,7 @@ from employeeservice.data.response.employeeresponse import EmployeeResponse
 from employeeservice.service.empuser import create_user
 from utilityservice.data.response.empmessage import WisefinMsg, SuccessMessage, ErrorMessage, Success, SuccessStatus, Error, ErrorDescription
 from utilityservice.data.response.emplist import WisefinList
-from employeeservice.util.emputil import ActiveStatus, UserrefType
+from employeeservice.util.emputil import ActiveStatus, UserrefType, Grade
 from utilityservice.data.response.emppaginator import WisefinPaginator
 
 
@@ -22,14 +22,15 @@ class EmployeeService:
                                                         first_name=obj.get_first_name(), middle_name=obj.get_middle_name(),
                                                         last_name=obj.get_last_name(),
                                                         email_id=obj.get_email_id(),
-                                                        role=obj.get_role(),
+                                                        designation=obj.get_designation(),
                                                         doj=obj.get_doj(),
                                                         gender=obj.get_gender(),
                                                         dob=obj.get_dob(),
                                                         user_id=obj.get_user_id(),
-                                                        departement=obj.get_departement(),
+                                                        department=obj.get_department(),
                                                         manager=obj.get_manager(),
-                                                        employee_type=obj.get_employee_type()
+                                                        employee_type=obj.get_employee_type(),
+                                                        grade=obj.get_grade()
 
 
                                                     )
@@ -53,14 +54,16 @@ class EmployeeService:
             emp_obj = Employee.objects.create(first_name=obj.get_first_name(), middle_name=obj.get_middle_name(),
                                     last_name =obj.get_last_name(),
                                     email_id =obj.get_email_id(),
-                                    role =obj.get_role(),
+                                    designation=obj.get_designation(),
                                     doj =obj.get_doj(),
                                     gender=obj.get_gender(),
                                     dob=obj.get_dob(),
                                     user_id=obj.get_user_id(),
-                                    departement=obj.get_departement(),
+                                    department=obj.get_department(),
                                     manager=obj.get_manager(),
-                                    employee_type=obj.get_employee_type())
+                                    employee_type=obj.get_employee_type(),
+                                    grade=obj.get_grade()
+                                              )
 
             emp_obj.code = UserrefType.EMPI + str(emp_obj.id)
             emp_obj.save()
@@ -75,7 +78,7 @@ class EmployeeService:
             condition &= (Q(first_name__icontains=query))
         if code is not None and code != '':
             condition &= Q(code=code)
-        obj = Employee.objects.filter(condition).order_by['-created_date'][vys_page.get_offset():vys_page.get_query_limit()]
+        obj = Employee.objects.filter(condition).order_by('-created_date')[vys_page.get_offset():vys_page.get_query_limit()]
         list_data = WisefinList()
         for x in obj:
             data_resp = EmployeeResponse()
@@ -83,15 +86,16 @@ class EmployeeService:
             data_resp.set_code(x.code)
             data_resp.set_doj(x.doj)
             data_resp.set_dob(x.dob)
-            data_resp.set_role(x.role)
+            data_resp.set_designation(x.designation)
             data_resp.set_email_id(x.email_id)
             data_resp.set_first_name(x.first_name)
             data_resp.set_middle_name(x.middle_name)
             data_resp.set_last_name(x.last_name)
             data_resp.set_gender(x.gender)
-            data_resp.set_departement(x.departement)
+            data_resp.set_department(x.department)
             data_resp.set_manager(x.manager)
             data_resp.set_employee_type(x.employee_type)
+            data_resp.set_grade(x.grade)
             list_data.append(data_resp)
         vpage = WisefinPaginator(obj, vys_page.get_index(), 10)
         list_data.set_pagination(vpage)
@@ -104,15 +108,16 @@ class EmployeeService:
         data_resp.set_code(obj.code)
         data_resp.set_doj(obj.doj)
         data_resp.set_dob(obj.dob)
-        data_resp.set_role(obj.role)
+        data_resp.set_designation(obj.designation)
         data_resp.set_email_id(obj.email_id)
         data_resp.set_first_name(obj.first_name)
         data_resp.set_middle_name(obj.middle_name)
         data_resp.set_last_name(obj.last_name)
         data_resp.set_gender(obj.gender)
-        data_resp.set_departement(obj.departement)
+        data_resp.set_department(obj.department)
         data_resp.set_manager(obj.manager)
         data_resp.set_employee_type(obj.employee_type)
+        data_resp.set_grade(obj.grade)
 
         return data_resp
 
@@ -123,6 +128,14 @@ class EmployeeService:
         success_obj.set_message(SuccessMessage.DELETE_MESSAGE)
         return success_obj
 
+#FOR_APPRAISAL_CREATE_DROPDOWN
+    def employee_get_info(self, id):
+        obj = Employee.objects.get(id=id)
+        data_resp = EmployeeResponse()
+        data_resp.set_id(obj.id)
+        data_resp.set_code(obj.code)
+        data_resp.set_first_name(obj.first_name)
+        return data_resp
 
 
 
